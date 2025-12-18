@@ -49,7 +49,7 @@ const OpenAI = {
                 { role: 'system', content: this.SYSTEM_PROMPT + '\n\n' + studentInfo },
                 { role: 'user', content: userMessage }
             ],
-            max_completion_tokens: 500
+            max_completion_tokens: 2000
         };
 
         try {
