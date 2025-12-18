@@ -31,6 +31,7 @@ const Store = {
     // Migration: add wrongNotes if missing
     const d = Store.get();
     if (!d.wrongNotes) { d.wrongNotes = []; Store.set(d); }
+    if (!d.tasks) { d.tasks = []; Store.set(d); }
   }
 };
 
@@ -41,6 +42,10 @@ const Actions = {
   addChat: (m) => { const d = Store.get(); d.chats.push(m); Store.set(d); },
   addWrongNote: (note) => { const d = Store.get(); d.wrongNotes.push({ ...note, id: Utils.id(), date: new Date().toISOString() }); Store.set(d); },
   deleteWrongNote: (id) => { const d = Store.get(); d.wrongNotes = d.wrongNotes.filter(n => n.id !== id); Store.set(d); },
+  // Planner
+  addTask: (task) => { const d = Store.get(); d.tasks.push({ ...task, id: Utils.id(), done: false, createdAt: new Date().toISOString() }); Store.set(d); },
+  toggleTask: (id) => { const d = Store.get(); const t = d.tasks.find(t => t.id === id); if (t) t.done = !t.done; Store.set(d); },
+  deleteTask: (id) => { const d = Store.get(); d.tasks = d.tasks.filter(t => t.id !== id); Store.set(d); },
   reset: () => { localStorage.removeItem(CONFIG.KEY); location.reload(); }
 };
 
@@ -372,6 +377,72 @@ const WrongNotesView = {
   }
 };
 
+// 학습 플래너 View
+const PlannerView = {
+  render: () => {
+    const { tasks } = Store.get();
+    const today = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+    const completedCount = tasks.filter(t => t.done).length;
+    const progress = tasks.length ? Math.round((completedCount / tasks.length) * 100) : 0;
+
+    document.getElementById('planner-content').innerHTML = `
+      <!-- 오늘 날짜 & 진행률 -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+          <div>
+            <div style="font-size:14px; color:var(--text-sub)">오늘</div>
+            <div style="font-size:20px; font-weight:700; color:#fff">${today}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:32px; font-weight:800; color:${progress === 100 ? '#10B981' : '#fff'}">${progress}%</div>
+            <div style="font-size:12px; color:var(--text-sub)">${completedCount}/${tasks.length} 완료</div>
+          </div>
+        </div>
+        <!-- Progress Bar -->
+        <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden">
+          <div style="height:100%; width:${progress}%; background:linear-gradient(90deg, #5E5CE6, #10B981); transition:width 0.3s"></div>
+        </div>
+      </div>
+      
+      <!-- 할 일 추가 -->
+      <div class="card" style="margin-bottom:20px">
+        <form id="task-form" style="display:flex; gap:10px">
+          <input id="task-input" class="form-input" placeholder="할 일을 입력하세요..." style="flex:1">
+          <button class="btn btn-primary" style="width:80px">추가</button>
+        </form>
+      </div>
+      
+      <!-- 할 일 목록 -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">오늘의 할 일</span></div>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          ${tasks.length ? tasks.map(t => `
+            <div class="teacher-item" style="opacity:${t.done ? '0.5' : '1'}">
+              <button onclick="Actions.toggleTask('${t.id}'); PlannerView.render();" 
+                      style="width:28px; height:28px; border-radius:50%; border:2px solid ${t.done ? '#10B981' : 'rgba(255,255,255,0.3)'}; background:${t.done ? '#10B981' : 'transparent'}; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0">
+                ${t.done ? '✓' : ''}
+              </button>
+              <div style="flex:1; text-decoration:${t.done ? 'line-through' : 'none'}; color:${t.done ? 'var(--text-sub)' : '#fff'}">${t.text}</div>
+              <button onclick="Actions.deleteTask('${t.id}'); PlannerView.render();" 
+                      style="background:none; border:none; color:var(--text-sub); cursor:pointer; padding:8px">✕</button>
+            </div>
+          `).join('') : '<div style="text-align:center; padding:30px; color:var(--text-sub)">할 일을 추가해보세요!</div>'}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('task-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('task-input');
+      const text = input.value.trim();
+      if (!text) return;
+      Actions.addTask({ text });
+      input.value = '';
+      PlannerView.render();
+    });
+  }
+};
+
 const Router = {
   go: (p) => {
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
@@ -387,6 +458,7 @@ const Router = {
     if (p === 'checkin') CheckinView.render();
     if (p === 'settings') SettingsView.render();
     if (p === 'wrongnotes') WrongNotesView.render();
+    if (p === 'planner') PlannerView.render();
   }
 };
 
