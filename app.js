@@ -73,44 +73,97 @@ const Charts = {
 
 const Dash = {
   render: () => {
-    const { profile, exams } = Store.get();
+    const { profile, exams, tasks, wrongNotes } = Store.get();
     const type = Utils.getType(profile.grade);
-    const lastScore = exams.length ? exams[exams.length - 1].score : '-';
+    const dday = Utils.dDay();
+    const lastScore = exams.length ? exams[exams.length - 1].score : null;
+
+    // 플래너 진행률
+    const completedTasks = (tasks || []).filter(t => t.done).length;
+    const totalTasks = (tasks || []).length;
+    const plannerProgress = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    // 취약 과목 분석 (오답 3개 이상)
+    const weakSubjects = [];
+    const subjectCounts = {};
+    (wrongNotes || []).forEach(n => {
+      subjectCounts[n.subject] = (subjectCounts[n.subject] || 0) + 1;
+    });
+    Object.entries(subjectCounts).forEach(([subj, count]) => {
+      if (count >= 3) weakSubjects.push({ subject: subj, count });
+    });
 
     document.getElementById('dashboard-content').innerHTML = `
-      <!-- 1. Profile Summary (Full Width) -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">내 프로필</span>
-          <span class="d-day-badge">D-${Utils.dDay()}</span>
+      <!-- D-Day Hero -->
+      <div class="card" style="text-align:center; padding:40px 20px; background:linear-gradient(135deg, rgba(94,92,230,0.2) 0%, rgba(16,185,129,0.1) 100%)">
+        <div style="font-size:14px; color:var(--text-sub); margin-bottom:8px">2025 수능까지</div>
+        <div style="font-size:72px; font-weight:800; color:#fff; line-height:1; margin-bottom:8px">D-${dday}</div>
+        <div style="font-size:16px; color:var(--text-sub)">${profile.name}님, 오늘도 화이팅! 💪</div>
+      </div>
+
+      <!-- Quick Stats Grid -->
+      <div class="grid-container" style="margin-top:20px">
+        <!-- 오늘 플래너 -->
+        <div class="card half-width" onclick="Router.go('planner')" style="cursor:pointer">
+          <div class="card-header"><span class="card-title">📅 오늘 플래너</span></div>
+          <div style="display:flex; align-items:center; gap:16px">
+            <div style="font-size:36px; font-weight:800; color:${plannerProgress === 100 ? '#10B981' : '#fff'}">${plannerProgress}%</div>
+            <div style="flex:1">
+              <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden">
+                <div style="height:100%; width:${plannerProgress}%; background:#5E5CE6; transition:width 0.3s"></div>
+              </div>
+              <div style="font-size:12px; color:var(--text-sub); margin-top:4px">${completedTasks}/${totalTasks} 완료</div>
+            </div>
+          </div>
         </div>
-        <div class="stat-row">
-           <div class="big-stat">${profile.name}</div>
-           <div class="sub-stat">목표 ${profile.target}등급 · ${type.name}</div>
+        
+        <!-- 최근 성적 -->
+        <div class="card half-width" onclick="Router.go('exams')" style="cursor:pointer">
+          <div class="card-header"><span class="card-title">📝 최근 모의고사</span></div>
+          <div style="display:flex; align-items:baseline; gap:8px">
+            <div style="font-size:36px; font-weight:800; color:#fff">${lastScore || '-'}</div>
+            <div style="font-size:14px; color:var(--text-sub)">점</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-sub); margin-top:4px">${type.name} · 목표 ${profile.target}등급</div>
         </div>
       </div>
 
-      <!-- 2. Charts (Grid) -->
-      <div class="grid-container">
-        <div class="card half-width">
-           <div class="card-header"><span class="card-title">성적 추이</span></div>
-           <div style="height:100px; display:flex; align-items:center; justify-content:center">
-             ${exams.length ? Charts.line(exams.map(e => ({ score: e.score }))) : '<span class="sub-stat">기록 없음</span>'}
-           </div>
+      <!-- 취약 과목 알림 -->
+      ${weakSubjects.length ? `
+        <div class="card" style="margin-top:20px; border-color:rgba(239,68,68,0.3)" onclick="Router.go('wrongnotes')" style="cursor:pointer">
+          <div class="card-header"><span class="card-title" style="color:#EF4444">⚠️ 취약 과목 알림</span></div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap">
+            ${weakSubjects.map(w => `
+              <div style="background:rgba(239,68,68,0.1); padding:8px 16px; border-radius:8px; border:1px solid rgba(239,68,68,0.3)">
+                <span style="color:#EF4444; font-weight:600">${w.subject}</span>
+                <span style="color:var(--text-sub); margin-left:8px">${w.count}회 오답</span>
+              </div>
+            `).join('')}
+          </div>
         </div>
-        <div class="card half-width">
-           <div class="card-header"><span class="card-title">밸런스</span></div>
-           <div style="height:100px; display:flex; align-items:center; justify-content:center">${Charts.radar()}</div>
+      ` : ''}
+
+      <!-- 성적 추이 차트 -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header"><span class="card-title">📈 성적 추이</span></div>
+        <div style="height:120px; display:flex; align-items:center; justify-content:center">
+          ${exams.length >= 2 ? Charts.line(exams.map(e => ({ score: e.score }))) :
+        '<div style="color:var(--text-sub)">2개 이상의 성적을 입력하면 그래프가 표시됩니다.</div>'}
         </div>
       </div>
-      
-      <!-- 3. Recent Activity -->
-      <div class="card">
-         <div class="card-header"><span class="card-title">최근 모의고사</span></div>
-         <div class="stat-row">
-            <span class="big-stat">${lastScore}</span>
-            <span class="sub-stat">점 (표준점수 합)</span>
-         </div>
+
+      <!-- 빠른 액션 -->
+      <div class="grid-container" style="margin-top:20px">
+        <button class="card half-width" onclick="Router.go('coaching')" style="text-align:left; cursor:pointer; border:none">
+          <div style="font-size:24px; margin-bottom:8px">🤖</div>
+          <div style="font-weight:600; color:#fff">AI 코칭</div>
+          <div style="font-size:13px; color:var(--text-sub)">학습 고민 상담하기</div>
+        </button>
+        <button class="card half-width" onclick="Router.go('teachers')" style="text-align:left; cursor:pointer; border:none">
+          <div style="font-size:24px; margin-bottom:8px">👨‍🏫</div>
+          <div style="font-weight:600; color:#fff">선생님 추천</div>
+          <div style="font-size:13px; color:var(--text-sub)">맞춤 강사 찾기</div>
+        </button>
       </div>
     `;
   }
