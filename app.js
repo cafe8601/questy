@@ -232,78 +232,117 @@ const ExamView = {
 };
 
 const CoachingView = {
+  selectedModel: localStorage.getItem('ai_model') || 'openai', // 기본값: OpenAI
+
   render: () => {
     const { chats, profile } = Store.get();
-    const hasApiKey = window.GeminiAI && window.GeminiAI.getApiKey();
+    const geminiKey = window.GeminiAI?.getApiKey();
+    const openaiKey = window.OpenAI?.getApiKey();
+    const hasKey = CoachingView.selectedModel === 'gemini' ? geminiKey : openaiKey;
 
     document.getElementById('coaching-content').innerHTML = `
-      ${!hasApiKey ? `
+      <!-- AI 모델 선택 -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><span class="card-title">🤖 AI 모델 선택</span></div>
+        <div style="display:flex; gap:10px">
+          <button id="select-openai" class="btn ${CoachingView.selectedModel === 'openai' ? 'btn-primary' : 'btn-ghost'}" style="flex:1">
+            OpenAI (GPT-5)
+          </button>
+          <button id="select-gemini" class="btn ${CoachingView.selectedModel === 'gemini' ? 'btn-primary' : 'btn-ghost'}" style="flex:1">
+            Gemini
+          </button>
+        </div>
+      </div>
+      
+      <!-- API 키 입력 -->
+      ${!hasKey ? `
         <div class="card" style="margin-bottom:16px; border-color:rgba(245,158,11,0.3)">
           <div class="card-header"><span class="card-title" style="color:#F59E0B">⚠️ API 키 필요</span></div>
-          <p style="font-size:14px; color:var(--text-sub); margin-bottom:12px">Gemini AI를 사용하려면 API 키를 입력하세요.</p>
+          <p style="font-size:14px; color:var(--text-sub); margin-bottom:12px">
+            ${CoachingView.selectedModel === 'openai' ? 'OpenAI' : 'Gemini'} API 키를 입력하세요.
+          </p>
           <div style="display:flex; gap:8px">
-            <input id="api-key-input" class="form-input" type="password" placeholder="Gemini API Key">
+            <input id="api-key-input" class="form-input" type="password" 
+                   placeholder="${CoachingView.selectedModel === 'openai' ? 'sk-...' : 'AIza...'}">
             <button id="save-api-key" class="btn btn-primary" style="width:80px">저장</button>
           </div>
         </div>
       ` : ''}
+      
+      <!-- 채팅 창 -->
       <div class="chat-window">
         <div class="chat-msgs" id="chat-box">
-          ${chats.length ? chats.map(c => `<div class="chat-bubble ${c.role}">${c.text}</div>`).join('') : '<div class="chat-bubble bot">안녕하세요! 입시 코치입니다. 학습 고민이 있으면 편하게 말씀해주세요.</div>'}
+          ${chats.length ? chats.map(c => `<div class="chat-bubble ${c.role}">${c.text}</div>`).join('') :
+        '<div class="chat-bubble bot">안녕하세요! 입시 코치입니다. 학습 고민이 있으면 편하게 말씀해주세요.</div>'}
         </div>
         <form id="c-form" style="padding:16px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px">
-           <input id="c-in" class="form-input" placeholder="메시지 입력..." ${!hasApiKey ? 'disabled' : ''}>
-           <button class="btn btn-primary" style="width:80px" ${!hasApiKey ? 'disabled' : ''}>전송</button>
+           <input id="c-in" class="form-input" placeholder="메시지 입력..." ${!hasKey ? 'disabled' : ''}>
+           <button class="btn btn-primary" style="width:80px" ${!hasKey ? 'disabled' : ''}>전송</button>
         </form>
       </div>
     `;
 
-    // Scroll to bottom
+    // 스크롤
     const b = document.getElementById('chat-box');
     if (b) b.scrollTop = b.scrollHeight;
 
-    // API Key save handler
-    const saveBtn = document.getElementById('save-api-key');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
-        const key = document.getElementById('api-key-input').value.trim();
-        if (key && window.GeminiAI) {
-          window.GeminiAI.setApiKey(key);
-          CoachingView.render();
-        }
-      });
-    }
+    // 모델 선택 이벤트
+    document.getElementById('select-openai')?.addEventListener('click', () => {
+      CoachingView.selectedModel = 'openai';
+      localStorage.setItem('ai_model', 'openai');
+      CoachingView.render();
+    });
 
-    // Chat submit handler
-    const form = document.getElementById('c-form');
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = document.getElementById('c-in');
-        const text = input.value.trim();
-        if (!text || !window.GeminiAI) return;
+    document.getElementById('select-gemini')?.addEventListener('click', () => {
+      CoachingView.selectedModel = 'gemini';
+      localStorage.setItem('ai_model', 'gemini');
+      CoachingView.render();
+    });
 
-        // Add user message
-        Actions.addChat({ role: 'user', text });
-        CoachingView.render();
-        input.value = '';
+    // API 키 저장
+    document.getElementById('save-api-key')?.addEventListener('click', () => {
+      const key = document.getElementById('api-key-input').value.trim();
+      if (!key) return;
 
-        // Show typing indicator
-        Actions.addChat({ role: 'bot', text: '⏳ 생각 중...' });
-        CoachingView.render();
+      if (CoachingView.selectedModel === 'openai' && window.OpenAI) {
+        window.OpenAI.setApiKey(key);
+      } else if (window.GeminiAI) {
+        window.GeminiAI.setApiKey(key);
+      }
+      CoachingView.render();
+    });
 
-        // Call Gemini API
-        const result = await window.GeminiAI.chat(text, { profile });
+    // 채팅 전송
+    document.getElementById('c-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('c-in');
+      const text = input.value.trim();
+      if (!text) return;
 
-        // Remove typing indicator and add real response
-        const d = Store.get();
-        d.chats.pop(); // Remove typing indicator
-        Store.set(d);
+      Actions.addChat({ role: 'user', text });
+      CoachingView.render();
+      input.value = '';
 
-        Actions.addChat({ role: 'bot', text: result.message });
-        CoachingView.render();
-      });
-    }
+      Actions.addChat({ role: 'bot', text: '⏳ 생각 중...' });
+      CoachingView.render();
+
+      // 선택된 모델로 API 호출
+      let result;
+      if (CoachingView.selectedModel === 'openai' && window.OpenAI) {
+        result = await window.OpenAI.chat(text, { profile });
+      } else if (window.GeminiAI) {
+        result = await window.GeminiAI.chat(text, { profile });
+      } else {
+        result = { message: 'API 모듈을 찾을 수 없습니다.' };
+      }
+
+      const d = Store.get();
+      d.chats.pop();
+      Store.set(d);
+
+      Actions.addChat({ role: 'bot', text: result.message });
+      CoachingView.render();
+    });
   }
 };
 
