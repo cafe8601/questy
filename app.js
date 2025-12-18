@@ -149,10 +149,10 @@ const Dash = {
         const monthPlan = window.CurriculumData.getCurrentMonthPlan('korean');
         const weeklyHours = window.CurriculumData.getWeeklyHours('korean', 'growth');
         return `
-          <div class="card" style="margin-top:20px; border-color:rgba(94,92,230,0.3)">
+          <div class="card" style="margin-top:20px; border-color:rgba(94,92,230,0.3); cursor:pointer" onclick="Router.go('curriculum')">
             <div class="card-header">
               <span class="card-title">📚 ${phase.name} - 이번 달 목표</span>
-              <span style="font-size:12px; color:var(--text-sub)">주 ${weeklyHours}시간 권장</span>
+              <span style="font-size:12px; color:var(--text-sub)">주 ${weeklyHours}시간 권장 →</span>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px">
               <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px">
@@ -706,6 +706,90 @@ const Router = {
     if (p === 'wrongnotes') WrongNotesView.render();
     if (p === 'planner') PlannerView.render();
     if (p === 'timer') TimerView.render();
+    if (p === 'curriculum') CurriculumView.render();
+  }
+};
+
+// 커리큘럼 View
+const CurriculumView = {
+  render: () => {
+    if (!window.CurriculumData) {
+      document.getElementById('curriculum-content').innerHTML = '<div class="card">커리큘럼 데이터를 불러올 수 없습니다.</div>';
+      return;
+    }
+
+    const data = window.CurriculumData.subjects.korean;
+    const currentPhase = window.CurriculumData.getCurrentPhase('korean');
+    const currentMonth = new Date().getMonth() + 1;
+
+    document.getElementById('curriculum-content').innerHTML = `
+      <!-- 현재 Phase 강조 -->
+      <div class="card" style="margin-bottom:20px; background:linear-gradient(135deg, rgba(94,92,230,0.2) 0%, rgba(16,185,129,0.1) 100%)">
+        <div style="text-align:center">
+          <div style="font-size:14px; color:var(--text-sub); margin-bottom:8px">현재 학습 단계</div>
+          <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:8px">${currentPhase.name}</div>
+          <div style="font-size:14px; color:var(--text-sub)">${currentPhase.goal}</div>
+        </div>
+      </div>
+      
+      <!-- 4단계 Phase 로드맵 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">📅 연간 로드맵</span></div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          ${data.phases.map(p => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:12px; 
+                        background:${p.id === currentPhase.id ? 'rgba(94,92,230,0.2)' : 'rgba(255,255,255,0.03)'};
+                        border:1px solid ${p.id === currentPhase.id ? 'rgba(94,92,230,0.4)' : 'transparent'}">
+              <div style="width:40px; height:40px; border-radius:50%; background:${p.id === currentPhase.id ? '#5E5CE6' : 'rgba(255,255,255,0.1)'};
+                          display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff">
+                ${p.id}
+              </div>
+              <div style="flex:1">
+                <div style="font-weight:600; color:#fff">${p.name}</div>
+                <div style="font-size:12px; color:var(--text-sub)">${p.months.join(', ')}월</div>
+              </div>
+              ${p.id === currentPhase.id ? '<span style="color:#10B981; font-size:12px; font-weight:600">현재</span>' : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- 월별 학습 내용 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">📖 월별 학습 내용</span></div>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          ${Object.entries(data.monthlyPlan).map(([month, plan]) => `
+            <div style="display:grid; grid-template-columns:50px 1fr 1fr 1fr; gap:8px; padding:10px; border-radius:8px;
+                        background:${parseInt(month) === currentMonth ? 'rgba(94,92,230,0.15)' : 'transparent'};
+                        ${parseInt(month) === currentMonth ? 'border:1px solid rgba(94,92,230,0.3)' : ''}">
+              <div style="font-weight:600; color:${parseInt(month) === currentMonth ? '#5E5CE6' : '#fff'}">${month}월</div>
+              <div style="font-size:12px; color:var(--text-sub)">${plan.reading}</div>
+              <div style="font-size:12px; color:var(--text-sub)">${plan.literature}</div>
+              <div style="font-size:12px; color:var(--text-sub)">${plan.choice}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- 권장 교재 -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">📚 권장 교재</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
+          <div>
+            <div style="font-weight:600; color:#fff; margin-bottom:8px">독서</div>
+            ${data.textbooks.reading.map(t => `
+              <div style="font-size:13px; color:var(--text-sub); margin-bottom:4px">• ${t.name} (${t.level})</div>
+            `).join('')}
+          </div>
+          <div>
+            <div style="font-weight:600; color:#fff; margin-bottom:8px">문학</div>
+            ${data.textbooks.literature.map(t => `
+              <div style="font-size:13px; color:var(--text-sub); margin-bottom:4px">• ${t.name} (${t.level})</div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
   }
 };
 
