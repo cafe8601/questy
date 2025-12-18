@@ -33,6 +33,14 @@ const GeminiAI = {
         return this.API_KEY;
     },
 
+    getStudentType(grade) {
+        if (!grade) return 'growth';
+        if (grade >= 5) return 'beginner';
+        if (grade >= 3) return 'growth';
+        if (grade >= 2) return 'leap';
+        return 'master';
+    },
+
     async chat(userMessage, context = {}) {
         const apiKey = this.getApiKey();
         if (!apiKey) {
@@ -46,16 +54,40 @@ const GeminiAI = {
             ? `현재 학생 정보: ${context.profile.name}, 현재 ${context.profile.grade}등급, 목표 ${context.profile.target}등급`
             : '';
 
+        // RAG: 지식 기반에서 관련 정보 검색
+        const ragContext = window.KnowledgeBase
+            ? window.KnowledgeBase.getKnowledgeContext(userMessage)
+            : '';
+
+        // 커리큘럼 컨텍스트
+        const curriculumContext = window.CurriculumData
+            ? window.CurriculumData.getAIContext('korean', this.getStudentType(context.profile?.grade))
+            : '';
+
+        const fullContext = `
+${this.SYSTEM_PROMPT}
+
+${studentInfo}
+
+[참조 문서 (RAG)]
+${ragContext}
+
+[현재 커리큘럼 정보]
+${curriculumContext}
+
+학생 질문: ${userMessage}
+        `.trim();
+
         const payload = {
             contents: [
                 {
                     role: 'user',
-                    parts: [{ text: `${this.SYSTEM_PROMPT}\n\n${studentInfo}\n\n학생 질문: ${userMessage}` }]
+                    parts: [{ text: fullContext }]
                 }
             ],
             generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: 500,
+                maxOutputTokens: 800,
                 topP: 0.9
             }
         };
