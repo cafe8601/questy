@@ -772,7 +772,8 @@ const CurriculumView = {
       </div>
       
       <!-- 권장 교재 -->
-      <div class="card">
+      <!-- 권장 교재 -->
+      <div class="card" style="margin-bottom:20px">
         <div class="card-header"><span class="card-title">📚 권장 교재</span></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
           <div>
@@ -785,6 +786,46 @@ const CurriculumView = {
             <div style="font-weight:600; color:#fff; margin-bottom:8px">문학</div>
             ${data.textbooks.literature.map(t => `
               <div style="font-size:13px; color:var(--text-sub); margin-bottom:4px">• ${t.name} (${t.level})</div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+      
+      <!-- 추천 선생님 -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👨‍🏫 국어 추천 선생님</span>
+          <button onclick="Router.go('teachers')" style="background:none; border:none; color:#5E5CE6; cursor:pointer; font-size:13px">전체보기 →</button>
+        </div>
+        
+        <!-- 독서 -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px">📖 독서</div>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            ${(window.TEACHER_DATA || []).filter(t => t.subject === 'reading').slice(0, 2).map(t => `
+              <div class="teacher-item">
+                <div class="t-avatar">${t.name[0]}</div>
+                <div class="t-info">
+                  <div class="t-name">${t.name}</div>
+                  <div class="t-sub">${t.platform} · ${t.tags[0]}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <!-- 문학 -->
+        <div>
+          <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px">📝 문학</div>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            ${(window.TEACHER_DATA || []).filter(t => t.subject === 'literature').slice(0, 2).map(t => `
+              <div class="teacher-item">
+                <div class="t-avatar">${t.name[0]}</div>
+                <div class="t-info">
+                  <div class="t-name">${t.name}</div>
+                  <div class="t-sub">${t.platform} · ${t.tags[0]}</div>
+                </div>
+              </div>
             `).join('')}
           </div>
         </div>
