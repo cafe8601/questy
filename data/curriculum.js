@@ -37,7 +37,7 @@ const CurriculumData = {
                 {
                     id: 4,
                     name: '파이널 정리기',
-                    months: [10, 11],
+                    months: [10, 11, 12],
                     goal: '최종 마무리, EBS 연계, 컨디션 최적화',
                     weeklyHours: { beginner: 10, growth: 13, leap: 14, master: 9 }
                 }
@@ -55,7 +55,8 @@ const CurriculumData = {
                 8: { reading: '수능특강 분석', literature: '작품 분석', choice: 'EBS 연계' },
                 9: { reading: '취약점 최종 보완', literature: '실전 감각', choice: 'D-60 전략' },
                 10: { reading: '개인 취약 유형 집중', literature: 'EBS 연계 완료', choice: '파이널 전략' },
-                11: { reading: '감각 유지, 컨디션', literature: '최종 정리', choice: '마무리' }
+                11: { reading: '감각 유지, 컨디션', literature: '최종 정리', choice: '마무리' },
+                12: { reading: '기초 다지기 시작', literature: '갈래 개념 복습', choice: '다음 학년도 준비' }
             },
 
             // 수험생 유형별 전략
