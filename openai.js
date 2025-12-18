@@ -50,7 +50,7 @@ const OpenAI = {
                 { role: 'user', content: userMessage }
             ],
             temperature: 0.7,
-            max_tokens: 500
+            max_completion_tokens: 500
         };
 
         try {
