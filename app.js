@@ -26,8 +26,11 @@ const Store = {
   init: () => {
     if (!Store.get()) Store.set({
       profile: { name: '수험생', grade: 5, target: 2 },
-      exams: [], checkins: [], chats: []
+      exams: [], checkins: [], chats: [], wrongNotes: []
     });
+    // Migration: add wrongNotes if missing
+    const d = Store.get();
+    if (!d.wrongNotes) { d.wrongNotes = []; Store.set(d); }
   }
 };
 
@@ -36,6 +39,8 @@ const Actions = {
   addExam: (e) => { const d = Store.get(); d.exams.push({ ...e, id: Utils.id() }); Store.set(d); },
   addCheckin: (c) => { const d = Store.get(); d.checkins.push({ ...c, date: new Date().toISOString() }); Store.set(d); },
   addChat: (m) => { const d = Store.get(); d.chats.push(m); Store.set(d); },
+  addWrongNote: (note) => { const d = Store.get(); d.wrongNotes.push({ ...note, id: Utils.id(), date: new Date().toISOString() }); Store.set(d); },
+  deleteWrongNote: (id) => { const d = Store.get(); d.wrongNotes = d.wrongNotes.filter(n => n.id !== id); Store.set(d); },
   reset: () => { localStorage.removeItem(CONFIG.KEY); location.reload(); }
 };
 
@@ -287,13 +292,92 @@ const SettingsView = {
   }
 };
 
+// 오답노트 View
+const WrongNotesView = {
+  SUBJECTS: ['국어', '수학', '영어', '한국사', '탐구1', '탐구2'],
+
+  render: () => {
+    const { wrongNotes } = Store.get();
+
+    // 과목별 통계
+    const stats = {};
+    WrongNotesView.SUBJECTS.forEach(s => stats[s] = 0);
+    wrongNotes.forEach(n => { if (stats[n.subject] !== undefined) stats[n.subject]++; });
+
+    document.getElementById('wrongnotes-content').innerHTML = `
+      <!-- 입력 폼 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">오답 기록 추가</span></div>
+        <form id="wrong-form">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px">
+            <div class="form-group" style="margin:0">
+              <label class="form-label">과목</label>
+              <select id="w-subject" class="form-input" style="height:44px">
+                ${WrongNotesView.SUBJECTS.map(s => `<option value="${s}">${s}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label class="form-label">단원/유형</label>
+              <input id="w-topic" class="form-input" placeholder="예: 비문학 독해">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">틀린 이유</label>
+            <input id="w-reason" class="form-input" placeholder="예: 시간 부족, 개념 미숙">
+          </div>
+          <button class="btn btn-primary" style="width:100%">추가하기</button>
+        </form>
+      </div>
+      
+      <!-- 취약 영역 분석 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">취약 영역 분석</span></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          ${WrongNotesView.SUBJECTS.map(s => `
+            <div style="flex:1; min-width:80px; text-align:center; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid ${stats[s] > 3 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.05)'}">
+              <div style="font-size:24px; font-weight:700; color:${stats[s] > 3 ? '#EF4444' : '#fff'}">${stats[s]}</div>
+              <div style="font-size:12px; color:var(--text-sub)">${s}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- 오답 목록 -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">오답 목록 (${wrongNotes.length}개)</span></div>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          ${wrongNotes.length ? wrongNotes.map(n => `
+            <div class="teacher-item" style="position:relative">
+              <div style="flex:1">
+                <div style="font-weight:600; color:#fff">[${n.subject}] ${n.topic || '미지정'}</div>
+                <div style="font-size:13px; color:var(--text-sub)">${n.reason || '-'}</div>
+              </div>
+              <button onclick="Actions.deleteWrongNote('${n.id}'); WrongNotesView.render();" 
+                      style="background:rgba(239,68,68,0.2); color:#EF4444; border:none; padding:6px 12px; border-radius:6px; cursor:pointer">삭제</button>
+            </div>
+          `).join('') : '<div style="text-align:center; padding:20px; color:var(--text-sub)">기록이 없습니다.</div>'}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('wrong-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      Actions.addWrongNote({
+        subject: document.getElementById('w-subject').value,
+        topic: document.getElementById('w-topic').value,
+        reason: document.getElementById('w-reason').value
+      });
+      WrongNotesView.render();
+    });
+  }
+};
+
 const Router = {
   go: (p) => {
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     document.getElementById(`page-${p}`).classList.add('active');
     document.querySelectorAll('.nav-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.page === p);
-      // 단순 텍스트 비교 대신 data-page 속성을 사용하여 스타일링
     });
 
     if (p === 'dashboard') Dash.render();
@@ -302,6 +386,7 @@ const Router = {
     if (p === 'coaching') CoachingView.render();
     if (p === 'checkin') CheckinView.render();
     if (p === 'settings') SettingsView.render();
+    if (p === 'wrongnotes') WrongNotesView.render();
   }
 };
 
