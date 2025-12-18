@@ -66,7 +66,8 @@ const OpenAI = {
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('OpenAI API Error:', errorData);
-                return { error: true, message: 'API 호출 실패. 키를 확인해주세요.' };
+                const errMsg = errorData.error?.message || '알 수 없는 오류';
+                return { error: true, message: `API 오류: ${errMsg}` };
             }
 
             const data = await response.json();
