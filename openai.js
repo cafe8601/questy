@@ -70,7 +70,13 @@ const OpenAI = {
             }
 
             const data = await response.json();
-            const reply = data.choices?.[0]?.message?.content || '응답을 생성할 수 없습니다.';
+            console.log('OpenAI Response:', data);
+
+            // 다양한 응답 형식 지원
+            const reply = data.choices?.[0]?.message?.content
+                || data.output?.[0]?.content?.[0]?.text
+                || data.message?.content
+                || JSON.stringify(data);
             return { error: false, message: reply };
 
         } catch (err) {
