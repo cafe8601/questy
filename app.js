@@ -170,24 +170,77 @@ const ExamView = {
 
 const CoachingView = {
   render: () => {
-    const { chats } = Store.get();
+    const { chats, profile } = Store.get();
+    const hasApiKey = window.GeminiAI && window.GeminiAI.getApiKey();
+
     document.getElementById('coaching-content').innerHTML = `
+      ${!hasApiKey ? `
+        <div class="card" style="margin-bottom:16px; border-color:rgba(245,158,11,0.3)">
+          <div class="card-header"><span class="card-title" style="color:#F59E0B">⚠️ API 키 필요</span></div>
+          <p style="font-size:14px; color:var(--text-sub); margin-bottom:12px">Gemini AI를 사용하려면 API 키를 입력하세요.</p>
+          <div style="display:flex; gap:8px">
+            <input id="api-key-input" class="form-input" type="password" placeholder="Gemini API Key">
+            <button id="save-api-key" class="btn btn-primary" style="width:80px">저장</button>
+          </div>
+        </div>
+      ` : ''}
       <div class="chat-window">
         <div class="chat-msgs" id="chat-box">
-          ${chats.length ? chats.map(c => `<div class="chat-bubble ${c.role}">${c.text}</div>`).join('') : '<div class="chat-bubble bot">안녕하세요! 학습 방향을 잡아드릴게요.</div>'}
+          ${chats.length ? chats.map(c => `<div class="chat-bubble ${c.role}">${c.text}</div>`).join('') : '<div class="chat-bubble bot">안녕하세요! 입시 코치입니다. 학습 고민이 있으면 편하게 말씀해주세요.</div>'}
         </div>
-        <form id="c-form" style="padding:16px; border-top:1px solid #333; display:flex; gap:10px">
-           <input id="c-in" class="form-input" placeholder="메시지 입력...">
-           <button class="btn btn-primary" style="width:60px">전송</button>
+        <form id="c-form" style="padding:16px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px">
+           <input id="c-in" class="form-input" placeholder="메시지 입력..." ${!hasApiKey ? 'disabled' : ''}>
+           <button class="btn btn-primary" style="width:80px" ${!hasApiKey ? 'disabled' : ''}>전송</button>
         </form>
       </div>
     `;
-    const b = document.getElementById('chat-box'); b.scrollTop = b.scrollHeight;
-    document.getElementById('c-form').addEventListener('submit', (e) => {
-      e.preventDefault(); const i = document.getElementById('c-in'); const t = i.value.trim(); if (!t) return;
-      Actions.addChat({ role: 'user', text: t }); CoachingView.render(); i.value = '';
-      setTimeout(() => { Actions.addChat({ role: 'bot', text: '분석 중입니다...' }); CoachingView.render(); }, 600);
-    });
+
+    // Scroll to bottom
+    const b = document.getElementById('chat-box');
+    if (b) b.scrollTop = b.scrollHeight;
+
+    // API Key save handler
+    const saveBtn = document.getElementById('save-api-key');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        const key = document.getElementById('api-key-input').value.trim();
+        if (key && window.GeminiAI) {
+          window.GeminiAI.setApiKey(key);
+          CoachingView.render();
+        }
+      });
+    }
+
+    // Chat submit handler
+    const form = document.getElementById('c-form');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('c-in');
+        const text = input.value.trim();
+        if (!text || !window.GeminiAI) return;
+
+        // Add user message
+        Actions.addChat({ role: 'user', text });
+        CoachingView.render();
+        input.value = '';
+
+        // Show typing indicator
+        Actions.addChat({ role: 'bot', text: '⏳ 생각 중...' });
+        CoachingView.render();
+
+        // Call Gemini API
+        const result = await window.GeminiAI.chat(text, { profile });
+
+        // Remove typing indicator and add real response
+        const d = Store.get();
+        d.chats.pop(); // Remove typing indicator
+        Store.set(d);
+
+        Actions.addChat({ role: 'bot', text: result.message });
+        CoachingView.render();
+      });
+    }
   }
 };
 
