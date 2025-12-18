@@ -370,6 +370,8 @@ const SettingsView = {
     const { profile } = Store.get();
     const isLightTheme = document.body.classList.contains('light-theme');
     const notifPermission = Notification.permission;
+    const openaiKey = localStorage.getItem('openai_api_key') || '';
+    const geminiKey = localStorage.getItem('gemini_api_key') || '';
 
     document.getElementById('settings-content').innerHTML = `
       <!-- 프로필 설정 -->
@@ -379,6 +381,37 @@ const SettingsView = {
         <div class="form-group"><label class="form-label">현재 등급</label><input id="s-grade" type="number" class="form-input" value="${profile.grade}"></div>
         <div class="form-group"><label class="form-label">목표 등급</label><input id="s-target" type="number" class="form-input" value="${profile.target}"></div>
         <button id="s-save" class="btn btn-primary" style="width:100%">프로필 저장</button>
+      </div>
+      
+      <!-- API 키 관리 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">🔑 API 키 관리</span></div>
+        
+        <div class="form-group">
+          <label class="form-label">OpenAI API 키</label>
+          <div style="display:flex; gap:8px">
+            <input id="openai-key" class="form-input" type="password" 
+                   value="${openaiKey}" placeholder="sk-proj-...">
+            <button id="save-openai" class="btn btn-primary" style="width:70px">저장</button>
+            <button id="clear-openai" class="btn btn-ghost" style="width:70px; color:#EF4444">삭제</button>
+          </div>
+          <div style="font-size:12px; color:var(--text-sub); margin-top:4px">
+            ${openaiKey ? '✓ 설정됨' : '미설정'}
+          </div>
+        </div>
+        
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Gemini API 키</label>
+          <div style="display:flex; gap:8px">
+            <input id="gemini-key" class="form-input" type="password" 
+                   value="${geminiKey}" placeholder="AIza...">
+            <button id="save-gemini" class="btn btn-primary" style="width:70px">저장</button>
+            <button id="clear-gemini" class="btn btn-ghost" style="width:70px; color:#EF4444">삭제</button>
+          </div>
+          <div style="font-size:12px; color:var(--text-sub); margin-top:4px">
+            ${geminiKey ? '✓ 설정됨' : '미설정'}
+          </div>
+        </div>
       </div>
       
       <!-- 테마 설정 -->
@@ -422,6 +455,38 @@ const SettingsView = {
         target: parseInt(document.getElementById('s-target').value)
       });
       alert('저장되었습니다!');
+    });
+
+    // OpenAI 키 저장/삭제
+    document.getElementById('save-openai').addEventListener('click', () => {
+      const key = document.getElementById('openai-key').value.trim();
+      if (key && window.OpenAI) {
+        window.OpenAI.setApiKey(key);
+        alert('OpenAI 키가 저장되었습니다!');
+        SettingsView.render();
+      }
+    });
+    document.getElementById('clear-openai').addEventListener('click', () => {
+      localStorage.removeItem('openai_api_key');
+      if (window.OpenAI) window.OpenAI.API_KEY = '';
+      alert('OpenAI 키가 삭제되었습니다.');
+      SettingsView.render();
+    });
+
+    // Gemini 키 저장/삭제
+    document.getElementById('save-gemini').addEventListener('click', () => {
+      const key = document.getElementById('gemini-key').value.trim();
+      if (key && window.GeminiAI) {
+        window.GeminiAI.setApiKey(key);
+        alert('Gemini 키가 저장되었습니다!');
+        SettingsView.render();
+      }
+    });
+    document.getElementById('clear-gemini').addEventListener('click', () => {
+      localStorage.removeItem('gemini_api_key');
+      if (window.GeminiAI) window.GeminiAI.API_KEY = '';
+      alert('Gemini 키가 삭제되었습니다.');
+      SettingsView.render();
     });
 
     // 테마 토글
