@@ -146,3 +146,7 @@ const TeacherMatcher = {
         }).sort((a, b) => b.matchScore - a.matchScore);
     }
 };
+
+// Export to window for global access
+window.TEACHER_DATA = TEACHER_DATA;
+window.TeacherMatcher = TeacherMatcher;
