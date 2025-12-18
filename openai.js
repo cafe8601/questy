@@ -49,7 +49,6 @@ const OpenAI = {
                 { role: 'system', content: this.SYSTEM_PROMPT + '\n\n' + studentInfo },
                 { role: 'user', content: userMessage }
             ],
-            temperature: 0.7,
             max_completion_tokens: 500
         };
 
