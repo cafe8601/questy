@@ -830,6 +830,52 @@ const CurriculumView = {
           </div>
         </div>
       </div>
+      
+      <!-- 수험생 유형별 분석 -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header"><span class="card-title">📊 수험생 유형별 전략</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+          ${Object.entries(data.studentTypes).map(([key, type]) => `
+            <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:12px">
+              <div style="font-weight:700; color:#fff; margin-bottom:4px">${type.name}</div>
+              <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px">${type.currentGrade} → ${type.targetGrade}</div>
+              <div style="font-size:12px; color:#10B981">${type.strategy}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- 멘탈 관리 가이드 -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header"><span class="card-title">🧠 멘탈 관리 가이드</span></div>
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px; font-weight:600; color:#fff; margin-bottom:8px">슬럼프 대응법</div>
+          ${data.mentalGuide.slump.map(s => `
+            <div style="display:grid; grid-template-columns:80px 80px 1fr; gap:8px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px">
+              <div style="color:#EF4444">${s.symptom}</div>
+              <div style="color:var(--text-sub)">${s.cause}</div>
+              <div style="color:#10B981">${s.solution}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div>
+          <div style="font-size:13px; font-weight:600; color:#fff; margin-bottom:8px">시험 당일 체크</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px">
+            <div style="background:rgba(239,68,68,0.1); padding:10px; border-radius:8px">
+              <div style="font-size:11px; color:#EF4444; margin-bottom:4px">전날</div>
+              ${data.mentalGuide.examDay.before.map(t => `<div style="font-size:11px; color:var(--text-sub)">• ${t}</div>`).join('')}
+            </div>
+            <div style="background:rgba(245,158,11,0.1); padding:10px; border-radius:8px">
+              <div style="font-size:11px; color:#F59E0B; margin-bottom:4px">당일</div>
+              ${data.mentalGuide.examDay.during.map(t => `<div style="font-size:11px; color:var(--text-sub)">• ${t}</div>`).join('')}
+            </div>
+            <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px">
+              <div style="font-size:11px; color:#10B981; margin-bottom:4px">시험 후</div>
+              ${data.mentalGuide.examDay.after.map(t => `<div style="font-size:11px; color:var(--text-sub)">• ${t}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
     `;
   }
 };
