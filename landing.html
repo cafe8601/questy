@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Exam Companion | 입시의 중력을 거스르다</title>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        :root {
+            --primary: #5E5CE6;
+            --primary-light: #7F7FD5;
+            --text-main: #FFFFFF;
+            --text-sub: rgba(255, 255, 255, 0.7);
+            --glass-bg: rgba(20, 20, 25, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #050505;
+            color: var(--text-main);
+            font-family: 'Pretendard', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+        }
+
+        /* --- BACKGROUND CINEMATOGRAPHY --- */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -2;
+            background-image: url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4) contrast(1.1) saturate(0.8);
+        }
+
+        .overlay-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(5, 5, 5, 0.8) 0%, rgba(5, 5, 5, 0.4) 50%, #050505 100%);
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 24px;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-glass {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .nav-menu a:hover {
+            color: #fff;
+        }
+
+        .cta-btn {
+            background: #fff;
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-light);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: fadeIn 1s var(--ease-out);
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 32px;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideUp 1s 0.2s backwards var(--ease-out);
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin-bottom: 48px;
+            animation: slideUp 1s 0.3s backwards var(--ease-out);
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            animation: slideUp 1s 0.4s backwards var(--ease-out);
+        }
+
+        .btn-xl {
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            transition: all 0.3s;
+        }
+
+        .btn-xl:hover {
+            background: #4b49c9;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(94, 92, 230, 0.4);
+        }
+
+        .btn-outline {
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .btn-outline:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- STATS SECTION --- */
+        .stats-bar {
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            padding: 40px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 40px;
+            font-weight: 800;
+            color: #fff;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        /* --- BENTO GRID --- */
+        .section {
+            padding: 120px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 60px;
+            text-align: left;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-desc {
+            font-size: 18px;
+            color: var(--text-sub);
+            max-width: 500px;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            grid-auto-rows: 300px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 32px;
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(30, 30, 40, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card.wide {
+            grid-column: span 2;
+        }
+
+        .card.tall {
+            grid-row: span 2;
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            font-size: 16px;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        /* --- REVIEWS --- */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .review-card {
+            background: #111;
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid #222;
+        }
+
+        .stars {
+            color: #FFD700;
+            margin-bottom: 16px;
+        }
+
+        .review-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ddd;
+            margin-bottom: 24px;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .author-info div {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .author-info span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* --- CTA --- */
+        .cta-section {
+            padding: 160px 20px;
+            text-align: center;
+            background: radial-gradient(circle, rgba(94, 92, 230, 0.2) 0%, rgba(5, 5, 5, 0) 70%);
+        }
+
+        /* --- ANIMATION --- */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 40px;
+            }
+
+            .bento-grid,
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card.wide,
+            .card.tall {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="bg-layer"></div>
+    <div class="overlay-gradient"></div>
+
+    <!-- Nav -->
+    <div class="nav-container">
+        <nav class="nav-glass">
+            <div class="logo">Exam Companion</div>
+            <div class="nav-menu">
+                <a href="#features">기능 소개</a>
+                <a href="#reviews">합격 후기</a>
+                <a href="#pricing">멤버십</a>
+            </div>
+            <a href="index.html" class="cta-btn">시스템 접속</a>
+        </nav>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-label">The Future of Education</div>
+        <h1>당신의 입시 전략은<br>데이터보다 정확해야 합니다.</h1>
+        <p>30만 수험생의 학습 패턴을 분석하여<br>가장 효율적인 1등급 로드맵을 제시합니다.</p>
+        <div class="hero-actions">
+            <a href="index.html" class="btn-xl">무료로 시작하기</a>
+            <button class="btn-outline">데모 영상 보기</button>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-num">32,401</span>
+            <span class="stat-label">누적 분석 데이터</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-num">94%</span>
+            <span class="stat-label">성적 상승률</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-num">2.4</span>
+            <span class="stat-label">평균 등급 상승</span>
+        </div>
+    </section>
+
+    <!-- Features (Bento) -->
+    <section id="features" class="section">
+        <div class="section-header">
+            <h2 class="section-title">압도적인 기술력.</h2>
+            <p class="section-desc">단순한 플래너가 아닙니다. <br>Exam Companion은 당신의 학습 DNA를 분석합니다.</p>
+        </div>
+        <div class="bento-grid">
+            <div class="card wide">
+                <div class="card-icon">🧠</div>
+                <div>
+                    <h3>Deep AI Analysis</h3>
+                    <p>학습 습관, 취약 유형, 문제 풀이 속도까지 분석하여 나도 몰랐던 나의 약점을 찾아냅니다.</p>
+                </div>
+                <div
+                    style="margin-top:20px; height:100px; background:linear-gradient(90deg, transparent, rgba(94,92,230,0.2), transparent); border:1px solid rgba(255,255,255,0.1); border-radius:12px;">
+                </div>
+            </div>
+            <div class="card tall">
+                <div class="card-icon">👨‍🏫</div>
+                <div>
+                    <h3>Teacher Match</h3>
+                    <p>내 성향과 가장 완벽하게 맞는 강사를 매칭합니다. <br>시행착오 없이 정답으로 직행하세요.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <div>
+                    <h3>24/7 Coaching</h3>
+                    <p>새벽 2시에도 불안할 땐 AI 코치와 상담하세요.</p>
+                </div>
+            </div>
+            <div class="card wide">
+                <div class="card-icon">📈</div>
+                <div>
+                    <h3>Real-time Tracking</h3>
+                    <p>모의고사 점수 입력 즉시 전국 백분위와 합격 가능 대학을 예측합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="reviews" class="section">
+        <div class="section-header">
+            <h2 class="section-title">증명된 결과.</h2>
+        </div>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p class="review-text">"수학 4등급에서 시작했는데, 제 약점이 '미적분 계산 실수'라는 걸 정확히 짚어줬어요. 6개월 만에 1등급 찍었습니다."</p>
+                <div class="review-author">
+                    <div class="author-avatar" style="background:#555"></div>
+                    <div class="author-info">
+                        <div>김민수</div><span>서울대 의예과 합격</span>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p class="review-text">"어떤 인강을 들어야 할지 막막했는데, 저랑 딱 맞는 선생님을 추천해줘서 시간 낭비를 줄였습니다."</p>
+                <div class="review-author">
+                    <div class="author-avatar" style="background:#777"></div>
+                    <div class="author-info">
+                        <div>이지은</div><span>연세대 경영학과 합격</span>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p class="review-text">"주간 리포트 기능이 정말 좋아요. 내가 공부를 얼마나 했는지 객관적으로 보니까 자극이 되더라고요."</p>
+                <div class="review-author">
+                    <div class="author-avatar" style="background:#444"></div>
+                    <div class="author-info">
+                        <div>박준호</div><span>고려대 반도체공학과 합격</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2 style="font-size:56px; margin-bottom:24px; font-weight:800">지금이 골든타임입니다.</h2>
+        <p style="font-size:20px; color:var(--text-sub); margin-bottom:48px;">더 이상 감으로 공부하지 마세요. Exam Companion과 함께하세요.
+        </p>
+        <a href="index.html" class="btn-xl">무료로 분석 시작하기</a>
+    </section>
+
+    <footer>
+        <div
+            style="border-top:1px solid rgba(255,255,255,0.1); padding:40px; text-align:center; font-size:14px; color:#666;">
+            &copy; 2025 Exam Companion. All rights reserved.
+        </div>
+    </footer>
+
+</body>
+
+</html>

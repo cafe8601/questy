@@ -1,0 +1,430 @@
+/* ========================================
+   입시 동반자 App - Cinematic Glass Theme v5.0
+   Concept: Matches Landing Page (Pretendard + Glassmorphism)
+   ======================================== */
+
+:root {
+    --primary: #5E5CE6;
+    --primary-glow: rgba(94, 92, 230, 0.4);
+    --text-main: #FFFFFF;
+    --text-sub: rgba(255, 255, 255, 0.75);
+    --text-dim: rgba(255, 255, 255, 0.5);
+
+    /* Glass Tokens */
+    --glass-bg: rgba(20, 20, 25, 0.65);
+    /* 앱이므로 조금 더 불투명하게 */
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --glass-blur: blur(16px);
+
+    --radius-card: 20px;
+    --radius-btn: 12px;
+
+    --font-main: 'Pretendard', -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: #000;
+    color: var(--text-main);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+}
+
+/* --- BACKGROUND --- */
+.app-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&q=80');
+    /* 차분한 서재 배경 */
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.3) blur(2px);
+    /* 앱 집중을 위해 어둡게 */
+}
+
+/* --- LAYOUT Structure --- */
+.main-app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 20px 80px;
+    /* 하단 여백 */
+    min-height: 100vh;
+}
+
+/* --- HEADER --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 24px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.d-day-badge {
+    background: rgba(94, 92, 230, 0.2);
+    border: 1px solid rgba(94, 92, 230, 0.4);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(94, 92, 230, 0.3);
+}
+
+/* --- NAVIGATION (Floating Glass Tab) --- */
+.nav {
+    display: flex;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: var(--glass-blur);
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 32px;
+    overflow-x: auto;
+    justify-content: space-between;
+    /* 꽉 채우기 */
+}
+
+.nav-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.nav-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(94, 92, 230, 0.4);
+}
+
+/* --- GLASS CARD System --- */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.2px;
+}
+
+/* Typography inside Card */
+.big-stat {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+}
+
+.sub-stat {
+    font-size: 14px;
+    color: var(--text-sub);
+}
+
+.stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+/* Grid Layouts */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.half-width {
+    grid-column: span 1;
+}
+
+@media (max-width: 600px) {
+    .grid-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .full-width,
+    .half-width {
+        width: 100%;
+    }
+}
+
+/* --- Teacher List (Glass Style) --- */
+.teachers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.teacher-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    border-radius: 16px;
+    transition: all 0.2s;
+}
+
+.teacher-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+}
+
+.t-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), #a29bfe);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.t-info {
+    flex: 1;
+}
+
+.t-name {
+    font-weight: 600;
+    color: #fff;
+    font-size: 15px;
+}
+
+.t-sub {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 2px;
+}
+
+.t-match {
+    font-size: 12px;
+    font-weight: 700;
+    color: #4cd137;
+    background: rgba(76, 209, 55, 0.15);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* --- Interactive Elements --- */
+.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 44px;
+    border-radius: var(--radius-btn);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 0 20px;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(94, 92, 230, 0.4);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-ghost {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-sub);
+}
+
+.btn-ghost:hover {
+    border-color: #fff;
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+}
+
+.form-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-btn);
+    color: #fff;
+    font-size: 15px;
+    transition: border 0.2s;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* --- Chat Window --- */
+.chat-window {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-card);
+}
+
+.chat-msgs {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.chat-bubble.bot {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-bubble.user {
+    background: var(--primary);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+/* --- PAGE TRANSITION --- */
+.page {
+    display: none;
+    animation: slideIn 0.4s var(--ease-out);
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* SVG Overrides */
+.chart-container {
+    width: 100%;
+    height: 120px;
+}
+
+.chart-line {
+    stroke: var(--primary);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+    fill: none;
+}
+
+.radar-polygon {
+    stroke: var(--primary);
+    stroke-width: 2;
+    fill: var(--primary-glow);
+}
