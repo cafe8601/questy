@@ -329,24 +329,84 @@ const CheckinView = {
 const SettingsView = {
   render: () => {
     const { profile } = Store.get();
+    const isLightTheme = document.body.classList.contains('light-theme');
+    const notifPermission = Notification.permission;
+
     document.getElementById('settings-content').innerHTML = `
-      <div class="card">
-        <div class="card-header"><span class="card-title">설정</span></div>
+      <!-- 프로필 설정 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">👤 프로필</span></div>
         <div class="form-group"><label class="form-label">이름</label><input id="s-name" class="form-input" value="${profile.name}"></div>
         <div class="form-group"><label class="form-label">현재 등급</label><input id="s-grade" type="number" class="form-input" value="${profile.grade}"></div>
         <div class="form-group"><label class="form-label">목표 등급</label><input id="s-target" type="number" class="form-input" value="${profile.target}"></div>
-        <button id="s-save" class="btn btn-primary" style="margin-bottom:12px">프로필 저장</button>
-        <button id="s-reset" class="btn" style="border:1px solid #d32f2f; color:#ef5350">데이터 초기화</button>
+        <button id="s-save" class="btn btn-primary" style="width:100%">프로필 저장</button>
+      </div>
+      
+      <!-- 테마 설정 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">🎨 테마</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:600; color:#fff">라이트 모드</div>
+            <div style="font-size:13px; color:var(--text-sub)">밝은 테마로 전환</div>
+          </div>
+          <div id="theme-toggle" class="toggle-switch ${isLightTheme ? 'active' : ''}"></div>
+        </div>
+      </div>
+      
+      <!-- 알림 설정 -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title">🔔 알림</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:600; color:#fff">푸시 알림</div>
+            <div style="font-size:13px; color:var(--text-sub)">타이머 완료 시 알림</div>
+          </div>
+          <button id="notif-btn" class="btn ${notifPermission === 'granted' ? 'btn-ghost' : 'btn-primary'}" style="padding:0 16px; height:36px">
+            ${notifPermission === 'granted' ? '✓ 허용됨' : '허용하기'}
+          </button>
+        </div>
+      </div>
+      
+      <!-- 데이터 관리 -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">🗑️ 데이터</span></div>
+        <button id="s-reset" class="btn" style="width:100%; border:1px solid rgba(239,68,68,0.5); color:#EF4444; background:rgba(239,68,68,0.1)">모든 데이터 초기화</button>
       </div>
     `;
+
+    // 프로필 저장
     document.getElementById('s-save').addEventListener('click', () => {
       Actions.updateProfile({
         name: document.getElementById('s-name').value,
         grade: parseInt(document.getElementById('s-grade').value),
         target: parseInt(document.getElementById('s-target').value)
-      }); alert('저장됨');
+      });
+      alert('저장되었습니다!');
     });
-    document.getElementById('s-reset').addEventListener('click', () => { if (confirm('삭제?')) Actions.reset(); });
+
+    // 테마 토글
+    document.getElementById('theme-toggle').addEventListener('click', (e) => {
+      document.body.classList.toggle('light-theme');
+      e.target.classList.toggle('active');
+      localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+    });
+
+    // 알림 권한
+    document.getElementById('notif-btn').addEventListener('click', async () => {
+      if (Notification.permission !== 'granted') {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          new Notification('Exam Companion', { body: '알림이 활성화되었습니다! 🎉' });
+          SettingsView.render();
+        }
+      }
+    });
+
+    // 데이터 초기화
+    document.getElementById('s-reset').addEventListener('click', () => {
+      if (confirm('모든 데이터가 삭제됩니다. 계속할까요?')) Actions.reset();
+    });
   }
 };
 
@@ -512,11 +572,113 @@ const Router = {
     if (p === 'settings') SettingsView.render();
     if (p === 'wrongnotes') WrongNotesView.render();
     if (p === 'planner') PlannerView.render();
+    if (p === 'timer') TimerView.render();
+  }
+};
+
+// 학습 타이머
+const TimerView = {
+  interval: null,
+  seconds: 25 * 60, // 25분 기본
+  isRunning: false,
+
+  formatTime: (secs) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = (secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  },
+
+  render: () => {
+    document.getElementById('timer-content').innerHTML = `
+      <div class="card" style="text-align:center; padding:40px">
+        <div style="font-size:14px; color:var(--text-sub); margin-bottom:16px">집중 타이머</div>
+        <div class="timer-display" id="timer-display">${TimerView.formatTime(TimerView.seconds)}</div>
+        
+        <div class="timer-controls">
+          <button id="timer-reset" class="timer-btn reset">↺</button>
+          <button id="timer-toggle" class="timer-btn ${TimerView.isRunning ? 'pause' : 'start'}">
+            ${TimerView.isRunning ? '⏸' : '▶'}
+          </button>
+        </div>
+        
+        <div style="margin-top:32px; display:flex; justify-content:center; gap:12px">
+          <button class="btn btn-ghost" onclick="TimerView.setTime(15)">15분</button>
+          <button class="btn btn-ghost" onclick="TimerView.setTime(25)">25분</button>
+          <button class="btn btn-ghost" onclick="TimerView.setTime(50)">50분</button>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top:20px">
+        <div class="card-header"><span class="card-title">💡 포모도로 기법</span></div>
+        <p style="font-size:14px; color:var(--text-sub); line-height:1.6">
+          25분 집중 → 5분 휴식을 반복하세요.<br>
+          4세트 완료 후 15~30분 긴 휴식을 취하면 효과적입니다.
+        </p>
+      </div>
+    `;
+
+    document.getElementById('timer-toggle').addEventListener('click', () => {
+      if (TimerView.isRunning) {
+        TimerView.pause();
+      } else {
+        TimerView.start();
+      }
+    });
+
+    document.getElementById('timer-reset').addEventListener('click', () => {
+      TimerView.reset();
+    });
+  },
+
+  setTime: (mins) => {
+    TimerView.seconds = mins * 60;
+    TimerView.isRunning = false;
+    clearInterval(TimerView.interval);
+    TimerView.render();
+  },
+
+  start: () => {
+    TimerView.isRunning = true;
+    TimerView.interval = setInterval(() => {
+      TimerView.seconds--;
+      document.getElementById('timer-display').textContent = TimerView.formatTime(TimerView.seconds);
+
+      if (TimerView.seconds <= 0) {
+        TimerView.pause();
+        TimerView.seconds = 25 * 60;
+        // 알림 보내기
+        if (Notification.permission === 'granted') {
+          new Notification('⏰ 타이머 완료!', { body: '수고하셨습니다. 잠시 휴식하세요.' });
+        }
+        alert('⏰ 타이머 완료! 휴식 시간입니다.');
+        TimerView.render();
+      }
+    }, 1000);
+    TimerView.render();
+  },
+
+  pause: () => {
+    TimerView.isRunning = false;
+    clearInterval(TimerView.interval);
+    TimerView.render();
+  },
+
+  reset: () => {
+    TimerView.isRunning = false;
+    clearInterval(TimerView.interval);
+    TimerView.seconds = 25 * 60;
+    TimerView.render();
   }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   Store.init();
+
+  // 테마 초기화
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-theme');
+  }
+
   document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => Router.go(b.dataset.page)));
   setTimeout(() => {
     document.getElementById('loading-screen').style.display = 'none';
@@ -524,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Router.go('dashboard');
   }, 300);
 });
+
 // PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

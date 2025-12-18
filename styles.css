@@ -428,3 +428,142 @@ button {
     stroke-width: 2;
     fill: var(--primary-glow);
 }
+/* ========================================
+   LIGHT THEME
+   ======================================== */
+body.light-theme {
+    background-color: #F5F5F7;
+    color: #1D1D1F;
+}
+
+body.light-theme .app-bg {
+    filter: brightness(1.1) blur(2px);
+    opacity: 0.3;
+}
+
+body.light-theme .card {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .card-title,
+body.light-theme .big-stat,
+body.light-theme .t-name {
+    color: #1D1D1F;
+}
+
+body.light-theme .nav {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .nav-btn {
+    color: #666;
+}
+
+body.light-theme .nav-btn.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+body.light-theme .form-input {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #1D1D1F;
+}
+
+body.light-theme .teacher-item {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .chat-bubble.bot {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1D1D1F;
+}
+
+/* ========================================
+   TIMER STYLES
+   ======================================== */
+.timer-display {
+    font-size: 80px;
+    font-weight: 800;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    letter-spacing: -2px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 4px 20px rgba(94, 92, 230, 0.5);
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.timer-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.2s;
+}
+
+.timer-btn.start {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(94, 92, 230, 0.4);
+}
+
+.timer-btn.pause {
+    background: #F59E0B;
+    color: #fff;
+}
+
+.timer-btn.reset {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Theme Toggle Switch */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toggle-switch {
+    width: 50px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.toggle-switch.active {
+    background: var(--primary);
+}
+
+.toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active::after {
+    transform: translateX(24px);
+}
