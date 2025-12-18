@@ -33,20 +33,35 @@ const OpenAI = {
         return this.API_KEY;
     },
 
+    // 등급에 따른 학생 유형 결정
+    getStudentType(grade) {
+        if (!grade) return 'growth';
+        if (grade >= 5) return 'beginner';
+        if (grade >= 3) return 'growth';
+        if (grade >= 2) return 'leap';
+        return 'master';
+    },
+
     async chat(userMessage, context = {}) {
         const apiKey = this.getApiKey();
         if (!apiKey) {
             return { error: true, message: 'OpenAI API 키가 설정되지 않았습니다. 설정에서 입력해주세요.' };
         }
 
+        // 학생 정보
         const studentInfo = context.profile
             ? `현재 학생 정보: ${context.profile.name}, 현재 ${context.profile.grade}등급, 목표 ${context.profile.target}등급`
+            : '';
+
+        // 커리큘럼 컨텍스트 (CurriculumData 모듈 사용)
+        const curriculumContext = window.CurriculumData
+            ? window.CurriculumData.getAIContext('korean', this.getStudentType(context.profile?.grade))
             : '';
 
         const payload = {
             model: this.MODEL,
             messages: [
-                { role: 'system', content: this.SYSTEM_PROMPT + '\n\n' + studentInfo },
+                { role: 'system', content: this.SYSTEM_PROMPT + '\n\n' + studentInfo + '\n\n' + curriculumContext },
                 { role: 'user', content: userMessage }
             ],
             max_completion_tokens: 2000

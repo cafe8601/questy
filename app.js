@@ -143,6 +143,35 @@ const Dash = {
         </div>
       ` : ''}
 
+      <!-- 이번 달 학습 목표 (커리큘럼 연동) -->
+      ${window.CurriculumData ? (() => {
+        const phase = window.CurriculumData.getCurrentPhase('korean');
+        const monthPlan = window.CurriculumData.getCurrentMonthPlan('korean');
+        const weeklyHours = window.CurriculumData.getWeeklyHours('korean', 'growth');
+        return `
+          <div class="card" style="margin-top:20px; border-color:rgba(94,92,230,0.3)">
+            <div class="card-header">
+              <span class="card-title">📚 ${phase.name} - 이번 달 목표</span>
+              <span style="font-size:12px; color:var(--text-sub)">주 ${weeklyHours}시간 권장</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px">
+              <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px">
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:4px">독서</div>
+                <div style="font-size:13px; color:#fff">${monthPlan?.reading || '-'}</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px">
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:4px">문학</div>
+                <div style="font-size:13px; color:#fff">${monthPlan?.literature || '-'}</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:12px">
+                <div style="font-size:12px; color:var(--text-sub); margin-bottom:4px">선택과목</div>
+                <div style="font-size:13px; color:#fff">${monthPlan?.choice || '-'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      })() : ''}
+
       <!-- 성적 추이 차트 -->
       <div class="card" style="margin-top:20px">
         <div class="card-header"><span class="card-title">📈 성적 추이</span></div>
